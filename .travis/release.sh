@@ -13,14 +13,14 @@ case "${ARCH}" in
       ;;
 esac
 
-if [[ -z $TRAVIS_TAG && $TRAVIS_BRANCH == "beta" ]]; then
-  GIT_COMMIT_SHORTCUTS=$(git log --format=%h -1)
-  GIT_COMMIT_TIME=$(git show -s --format="%cd" --date=format:%Y%m%d%H%M%S $TRAVIS_BRANCH)
-  TRAVIS_TAG="$GIT_COMMIT_TIME-$GIT_COMMIT_SHORTCUTS"
-  echo "TRAVIS_TAG is $TRAVIS_TAG";
+export T_BUILD_NAME=$TRAVIS_TAG
+
+if [[ -z $T_BUILD_NAME && $TRAVIS_BRANCH == "beta" ]]; then
+  T_BUILD_NAME="$(git describe --tags)"
+  echo "T_BUILD_NAME is $T_BUILD_NAME";
 fi
 
-mkdir -p ${TRAVIS_TAG}
+mkdir -p ${T_BUILD_NAME}
 
 DIST_FILE=""
 
@@ -32,10 +32,10 @@ if [[ $TRAVIS_OS_NAME == 'linux' ]]; then # linux
   XZ_FILE=${DIST_FILE}/fibjs.xz
   GZ_FILE=${DIST_FILE}/fibjs.tar.gz
 
-  cp ${FIBJS_FILE} ${TRAVIS_TAG}/fibjs-${TRAVIS_TAG}-linux-${TARGET_ARCH}
-  cp ${INSTALLER_FILE} ${TRAVIS_TAG}/installer-${TRAVIS_TAG}-linux-${TARGET_ARCH}.sh
-  cp ${XZ_FILE} ${TRAVIS_TAG}/fibjs-${TRAVIS_TAG}-linux-${TARGET_ARCH}.xz
-  cp ${GZ_FILE} ${TRAVIS_TAG}/fibjs-${TRAVIS_TAG}-linux-${TARGET_ARCH}.tar.gz
+  cp ${FIBJS_FILE} ${T_BUILD_NAME}/fibjs-${T_BUILD_NAME}-linux-${TARGET_ARCH}
+  cp ${INSTALLER_FILE} ${T_BUILD_NAME}/installer-${T_BUILD_NAME}-linux-${TARGET_ARCH}.sh
+  cp ${XZ_FILE} ${T_BUILD_NAME}/fibjs-${T_BUILD_NAME}-linux-${TARGET_ARCH}.xz
+  cp ${GZ_FILE} ${T_BUILD_NAME}/fibjs-${T_BUILD_NAME}-linux-${TARGET_ARCH}.tar.gz
 
 else # darwin
   DIST_FILE=bin/Darwin_${ARCH}_release
@@ -45,15 +45,15 @@ else # darwin
   XZ_FILE=${DIST_FILE}/fibjs.xz
   GZ_FILE=${DIST_FILE}/fibjs.tar.gz
 
-  cp ${FIBJS_FILE} ${TRAVIS_TAG}/fibjs-${TRAVIS_TAG}-darwin-${TARGET_ARCH}
-  cp ${INSTALLER_FILE} ${TRAVIS_TAG}/installer-${TRAVIS_TAG}-darwin-${TARGET_ARCH}.sh
-  cp ${XZ_FILE} ${TRAVIS_TAG}/fibjs-${TRAVIS_TAG}-darwin-${TARGET_ARCH}.xz
-  cp ${GZ_FILE} ${TRAVIS_TAG}/fibjs-${TRAVIS_TAG}-darwin-${TARGET_ARCH}.tar.gz
+  cp ${FIBJS_FILE} ${T_BUILD_NAME}/fibjs-${T_BUILD_NAME}-darwin-${TARGET_ARCH}
+  cp ${INSTALLER_FILE} ${T_BUILD_NAME}/installer-${T_BUILD_NAME}-darwin-${TARGET_ARCH}.sh
+  cp ${XZ_FILE} ${T_BUILD_NAME}/fibjs-${T_BUILD_NAME}-darwin-${TARGET_ARCH}.xz
+  cp ${GZ_FILE} ${T_BUILD_NAME}/fibjs-${T_BUILD_NAME}-darwin-${TARGET_ARCH}.tar.gz
 
   if [[ $TARGET_ARCH == 'x64' ]]; then
     echo "zip fullsrc..."
     sudo sh build clean
-    zip -r ./${TRAVIS_TAG}/fullsrc.zip ./ -x *.git* ${TRAVIS_TAG} ${TRAVIS_TAG}/*
+    zip -r ./${T_BUILD_NAME}/fullsrc.zip ./ -x *.git* ${T_BUILD_NAME} ${T_BUILD_NAME}/*
   fi
 fi
 
